@@ -6,3 +6,4 @@ Python version of [secret-santa-o-matic](https://github.com/buddemat/secret-sant
 ## Implementation in progress
 
 nothing here yet...
+
