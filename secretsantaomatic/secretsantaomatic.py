@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-'''Secret-Santa-O-Matic (for Python)
+"""Secret-Santa-O-Matic (for Python)
 
 This script allows the user to generate and print to the console a sequence
 of names that represents a gift giving order for secret santa. Includes the
@@ -12,7 +12,7 @@ functions:
 
     * draw_lots - randomly draws a secret santa sequence
     * main - the main function of the script
-'''
+"""
 
 #This script requires that `logging` be installed within the Python
 #environment you are running this script in.
@@ -26,7 +26,7 @@ import random
 options = { 'outpath': './santas' }
 
 def draw_lots(candidate_set: set, forbidden_recipients: dict = {}) -> list:
-    '''Creates a random secret santa sequence from a candidate list.
+    """Creates a random secret santa sequence from a candidate list.
 
     Parameters
     ----------
@@ -41,7 +41,7 @@ def draw_lots(candidate_set: set, forbidden_recipients: dict = {}) -> list:
     ------
     Secret santa sequence as list of names. Last element is first name again.
     Returns empty set if no valid sequence can be found.
-    '''
+    """
     candidate_set_copy = candidate_set.copy()
     result_sequence = []
     previous_candidate = None
@@ -69,7 +69,7 @@ def draw_lots(candidate_set: set, forbidden_recipients: dict = {}) -> list:
     return result_sequence
 
 def write_sequence(sequence: list):
-    '''writes the passed sequence into files.'''
+    """writes the passed sequence into files."""
     write_path = options.get('outpath', '.')
     for gifter, recipient in zip(sequence, sequence[1:]):
         print(gifter, recipient)
@@ -84,11 +84,11 @@ def write_sequence(sequence: list):
 
 # # TODO: write function to dynamically load people
 # def register_recipient(name: str, forbidden_recipients: list = None):
-#     '''Add a recipient, optionally with a list of people whom they should not give gifts to.'''
+#     """Add a recipient, optionally with a list of people whom they should not give gifts to."""
 #     pass
 
 def main():
-    '''Main function to demo.'''
+    """Main function to demo."""
     sequence = []
     while not sequence:
         sequence = draw_lots({'Alice', 'Bob', 'Charlene', 'David'},
