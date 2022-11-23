@@ -23,7 +23,9 @@ __version__ = '0.01'
 
 import random
 
-options = { 'outpath': './santas' }
+options = { 'outpath': './santas',
+            'asciiartpath': None
+          }
 
 def draw_lots(candidate_set: set, forbidden_recipients: dict = {}) -> list:
     """Creates a random secret santa sequence from a candidate list.
@@ -81,6 +83,9 @@ def write_sequence(sequence: list):
             outfile.write('You are secret santa for ... (drumroll) ...\n\n')
             outfile.write(f'     {recipient}\n\n')
             outfile.write('Enjoy! And please don\'t tell anyone!\n')
+            if options.get('asciiartpath'):
+                with open(options.get('asciiartpath'), 'r', encoding='utf-8') as asciiart:
+                    outfile.write(asciiart.read())
 
 # # TODO: write function to dynamically load people
 # def register_recipient(name: str, forbidden_recipients: list = None):
