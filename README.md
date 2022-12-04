@@ -4,16 +4,19 @@ This project is a Python version of my `perl` script [secret-santa-o-matic](http
 
 It is possible to exclude certain people from being gift recipients for others, e.g. if two people are a couple and they and will be giving gifts to each other already anyway.
 
-:bangbang: This software is under construction, so there is not a everything here yet...
+:bangbang:   
+:bangbang: This software is under construction, so not everything's here yet...  
+:bangbang:   
 
 ## Usage
+Before generating a sequence of secret santas, the list of people from whom said sequence should be built need to be configured.
 
 ### Configuration
 To generate a sequence for a list of people, add those people in the config file `config.yml`. For each person, insert a key under the 1st level key `candidates`. If the respective
 persons should be excluded as secret santa for certain people, add a list of these as 
 value for the respective name.
 
-Example `candidates` section:
+##### Example `candidates` section:
 
 ```yaml
 candidates:
