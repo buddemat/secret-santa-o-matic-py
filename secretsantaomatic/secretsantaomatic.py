@@ -14,12 +14,12 @@ functions:
     * main - the main function of the script
 """
 
-#This script requires that `logging` be installed within the Python
+#TODO This script requires that `logging` be installed within the Python
 #environment you are running this script in.
 
-# Will terminate after 20 tries if no valid sequence can be found.
+#TODO Will terminate after 20 tries if no valid sequence can be found.
 
-__version__ = '0.01'
+__version__ = '0.02'
 
 import random
 import yaml
@@ -28,38 +28,37 @@ import yaml
 options = yaml.safe_load(open('./config.yml'))
 
 
-def draw_lots(candidate_set: set, forbidden_recipients: dict = {}) -> list:
+def draw_lots(candidate_dict: dict) -> list:
     """Creates a random secret santa sequence from a candidate list.
 
     Parameters
     ----------
-    candidate_set : set, mandatory
-        set with names from whom a secret santa sequence should be drawn.
-    forbidden_recipients : dict, optional
-        dictionary that holds for each candidate a list of candidates that
-        should not receive gifts from the candidate by that name
-        (default is None).
+    candidate_dict : dict, mandatory
+        dict with names from whom a secret santa sequence should be drawn. 
+        The candidate names are the keys and the (optional) values are a list 
+        of candidates that should not receive gifts from the respective candidate.
 
     Returns
     ------
     Secret santa sequence as list of names. Last element is first name again.
     Returns empty set if no valid sequence can be found.
     """
-    candidate_set_copy = candidate_set.copy()
+    candidate_set = set(candidate_dict.keys())
+    forbidden_recipients = {k: v for k, v in candidate_dict.items() if v is not None}
     result_sequence = []
     previous_candidate = None
     fail_count = 0
-    while candidate_set_copy:
-        candidate_name = random.choice(tuple(candidate_set_copy))
+    while candidate_set:
+        candidate_name = random.choice(tuple(candidate_set))
         if not candidate_name in forbidden_recipients.get(previous_candidate, []):
             result_sequence.append(candidate_name)
-            candidate_set_copy.remove(candidate_name)
+            candidate_set.remove(candidate_name)
             previous_candidate = candidate_name
             fail_count = 0
         else:
             print('Candidate invalid!')
             fail_count += 1
-        if fail_count >= 5:
+        if fail_count >= 10:
             result_sequence = []
             break
     # check if last and first in sequence are a valid combination
@@ -72,10 +71,10 @@ def draw_lots(candidate_set: set, forbidden_recipients: dict = {}) -> list:
     return result_sequence
 
 def write_sequence(sequence: list):
-    """writes the passed sequence into files."""
+    """writes the passed sequence to files."""
     write_path = options.get('outpath', '.')
     for gifter, recipient in zip(sequence, sequence[1:]):
-        print(gifter, recipient)
+        #print(gifter, recipient)
         with open(f'{write_path}/{gifter}.txt', 'w', encoding = 'utf-8') as outfile:
             outfile.write('')
             outfile.write(f'Hello {gifter}!\n\n')
@@ -95,10 +94,11 @@ def write_sequence(sequence: list):
 
 def main():
     """Main function to demo."""
+    candidates = options.get('candidates')
+
     sequence = []
     while not sequence:
-        sequence = draw_lots({'Alice', 'Bob', 'Charlene', 'David'},
-                {'Alice': ['Bob'], 'Bob': ['Alice']})
+        sequence = draw_lots(candidates)
     write_sequence(sequence)
 
 if __name__ == '__main__':

@@ -1,2 +1,9 @@
 outpath: './santas'
 asciiartpath:
+
+candidates:
+    # Candidate name: [List of people that may not recieve a gift from candidate]
+    Alice: [Bob]
+    Bob: [Alice]
+    Charlene:
+    David:
