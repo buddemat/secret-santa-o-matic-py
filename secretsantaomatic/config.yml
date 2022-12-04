@@ -1,5 +1,5 @@
 outpath: './santas'
-asciiartpath:
+asciiartpath: 'ascii_tree.txt'
 
 candidates:
     # Candidate name: [List of people that may not recieve a gift from candidate]
