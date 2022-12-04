@@ -1,1 +1,5 @@
 *.swp
+*.swo
+
+secretsantaomatic/santas/*
+!secretsantaomatic/santas/README.md
