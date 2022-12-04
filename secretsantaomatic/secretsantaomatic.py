@@ -22,10 +22,11 @@ functions:
 __version__ = '0.01'
 
 import random
+import yaml
 
-options = { 'outpath': './santas',
-            'asciiartpath': None
-          }
+# Load options 
+options = yaml.safe_load(open('./config.yml'))
+
 
 def draw_lots(candidate_set: set, forbidden_recipients: dict = {}) -> list:
     """Creates a random secret santa sequence from a candidate list.
