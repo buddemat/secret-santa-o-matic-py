@@ -22,10 +22,15 @@ functions:
 __version__ = '0.02'
 
 import random
+import logging
 import yaml
 
-# Load options 
+# Load options
 options = yaml.safe_load(open('./config.yml'))
+
+sso_logger = logging.getLogger('secretsantaomatic')
+sso_log_lvl = logging.getLevelName('INFO')
+sso_logger.setLevel(sso_log_lvl) # log level for mylogger
 
 
 def draw_lots(candidate_dict: dict) -> list:
@@ -34,8 +39,8 @@ def draw_lots(candidate_dict: dict) -> list:
     Parameters
     ----------
     candidate_dict : dict, mandatory
-        dict with names from whom a secret santa sequence should be drawn. 
-        The candidate names are the keys and the (optional) values are a list 
+        dict with names from whom a secret santa sequence should be drawn.
+        The candidate names are the keys and the (optional) values are a list
         of candidates that should not receive gifts from the respective candidate.
 
     Returns
