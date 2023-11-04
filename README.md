@@ -9,7 +9,7 @@ It is possible to exclude certain people from being gift recipients for others, 
 :bangbang:   
 
 ## Usage
-Before generating a sequence of secret santas, the list of people from whom said sequence should be built need to be configured.
+Before generating a sequence of secret santas, the list of people from whom said sequence should be built needs to be configured.
 
 ### Configuration
 To generate a sequence for a list of people, add those people in the config file `config.yml`. For each person, insert a key under the 1st level key `candidates`. If the respective
