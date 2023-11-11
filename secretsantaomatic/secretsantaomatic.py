@@ -25,9 +25,6 @@ import random
 import logging
 import yaml
 
-# Load options
-options = yaml.safe_load(open('./config.yml'))
-
 sso_logger = logging.getLogger('secretsantaomatic')
 sso_log_lvl = logging.getLevelName('INFO')
 sso_logger.setLevel(sso_log_lvl) # log level for mylogger
@@ -59,6 +56,20 @@ class Santa:
                     self.forbidden_recipients.pop(k, None)
 
     def __draw_lots(self, max_tries = 10) -> list:
+        """Creates a random secret santa sequence from a candidate list.
+
+        Parameters
+        ----------
+        candidate_dict : dict, mandatory
+            dict with names from whom a secret santa sequence should be drawn.
+            The candidate names are the keys and the (optional) values are a list
+            of candidates that should not receive gifts from the respective candidate.
+
+        Returns
+        ------
+        Secret santa sequence as list of names. Last element is first name again.
+        Returns empty set if no valid sequence can be found.
+        """
         candidate_set = self.recipient_set.copy()
         result_sequence = []
         previous_candidate = None
@@ -93,51 +104,8 @@ class Santa:
         self.sequence = self.__draw_lots()
 
 
-def draw_lots(candidate_dict: dict) -> list:
-    """Creates a random secret santa sequence from a candidate list.
-
-    Parameters
-    ----------
-    candidate_dict : dict, mandatory
-        dict with names from whom a secret santa sequence should be drawn.
-        The candidate names are the keys and the (optional) values are a list
-        of candidates that should not receive gifts from the respective candidate.
-
-    Returns
-    ------
-    Secret santa sequence as list of names. Last element is first name again.
-    Returns empty set if no valid sequence can be found.
-    """
-    candidate_set = set(candidate_dict.keys())
-    forbidden_recipients = {k: v for k, v in candidate_dict.items() if v is not None}
-    result_sequence = []
-    previous_candidate = None
-    fail_count = 0
-    while candidate_set:
-        candidate_name = random.choice(tuple(candidate_set))
-        if not candidate_name in forbidden_recipients.get(previous_candidate, []):
-            result_sequence.append(candidate_name)
-            candidate_set.remove(candidate_name)
-            previous_candidate = candidate_name
-            fail_count = 0
-        else:
-            print('Candidate invalid!')
-            fail_count += 1
-        if fail_count >= 10:
-            result_sequence = []
-            break
-    # check if last and first in sequence are a valid combination
-    if result_sequence:
-        first_recipient = result_sequence[0]
-        if not first_recipient in forbidden_recipients.get(previous_candidate, []):
-            result_sequence.append(first_recipient)
-        else:
-            result_sequence = []
-    return result_sequence
-
-def write_sequence(sequence: list):
+def write_sequence(sequence: list, write_path:str='.'):
     """writes the passed sequence to files."""
-    write_path = options.get('outpath', '.')
     for gifter, recipient in zip(sequence, sequence[1:]):
         #print(gifter, recipient)
         with open(f'{write_path}/{gifter}.txt', 'w', encoding = 'utf-8') as outfile:
@@ -158,13 +126,17 @@ def write_sequence(sequence: list):
 #     pass
 
 def main():
+    # Load options
+    options = yaml.safe_load(open('./config.yml'))
+    outpath = options.get('outpath', '.')
+
     """Main function to demo."""
     candidates = options.get('candidates')
 
     sequence = []
     while not sequence:
         sequence = draw_lots(candidates)
-    write_sequence(sequence)
+    write_sequence(sequence, outpath)
 
 if __name__ == '__main__':
     main()
