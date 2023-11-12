@@ -7,10 +7,16 @@ possibility to set invalid (i.e. forbidden) combinations.
 
 Author: Matthias Budde 2022 - 2023
 
-This file can also be imported as a module and contains the following
-functions:
+This file can also be imported as a module and contains the `Santa` class 
+with the following functions:
 
-    * draw_lots - randomly draws a secret santa sequence
+    * register_recipient
+    * delete_recipient
+    * generate_sequence - randomly draws a secret santa sequence
+
+Additonally, when not imported as a module, this file executes some example
+code illustrating its use:
+
     * main - the main function of the script
 """
 
@@ -40,6 +46,9 @@ class Santa:
         return f'Secret santa for {self.recipient_set}'
 
     def register_recipient(self, name: str, forbidden_recipients: list = None):
+        """Adds a new recipient to Santa's candidate list, optionally with a list 
+           of people whom they should not give gifts to.
+        """
         if name.casefold() in (recipient.casefold() for recipient in self.recipient_set):
             print(f'Someone by the name of {name} is already in the recipient list!')
         else:
@@ -48,6 +57,8 @@ class Santa:
                 self.forbidden_recipients.update({name: set(forbidden_recipients)}) 
 
     def delete_recipient(self, name: str, cascade: bool = False):
+        """Removes the named recipient from Santa's candidate list.
+        """
         self.recipient_set.discard(name)
         if cascade:
             for k,v in list(self.forbidden_recipients.items()):
@@ -56,7 +67,7 @@ class Santa:
                     self.forbidden_recipients.pop(k, None)
 
     def __draw_lots(self, max_tries = 10) -> list:
-        """Creates a random secret santa sequence from a candidate list.
+        """Creates a random secret santa sequence from Santa's candidate list.
 
         Parameters
         ----------
@@ -99,9 +110,14 @@ class Santa:
     def __is_valid_sequence(self, sequence: list):
         #TODO
         return False
+ 
+    def __sequence_possble(self):
+        #TODO implement function to check if it may be impossible to generate a sequence
+        pass
 
     def generate_sequence(self):
         self.sequence = self.__draw_lots()
+        return self.sequence
 
 
 def write_sequence(sequence: list, write_path:str='.'):
@@ -120,11 +136,6 @@ def write_sequence(sequence: list, write_path:str='.'):
                 with open(options.get('asciiartpath'), 'r', encoding='utf-8') as asciiart:
                     outfile.write(asciiart.read())
 
-# # TODO: write function to dynamically load people
-# def register_recipient(name: str, forbidden_recipients: list = None):
-#     """Add a recipient, optionally with a list of people whom they should not give gifts to."""
-#     pass
-
 def main():
     # Load options
     options = yaml.safe_load(open('./config.yml'))
@@ -133,10 +144,13 @@ def main():
     """Main function to demo."""
     candidates = options.get('candidates')
 
+    ssom = Santa(candidates)
+
     sequence = []
     while not sequence:
-        sequence = draw_lots(candidates)
-    write_sequence(sequence, outpath)
+        sequence = ssom.generate_sequence()
+    #write_sequence(sequence, outpath)
+    print(sequence)
 
 if __name__ == '__main__':
     main()
