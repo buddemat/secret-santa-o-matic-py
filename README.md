@@ -30,6 +30,9 @@ This will generate a secret santa sequence of four people (Alice, Bob, Charlene,
 
 ### Execution
 
+
+#### As standalone script
+
 Once the recipients are configured, simply run
 
 ```python
@@ -37,6 +40,15 @@ $ python secretsantaomatic.py
 ```
 
 The resulting sequence will be written to individual files which can then be emailed as attachments to the individual recipients without knowing who gets whom.
+
+#### As a module
+
+To use `secret-santa-o-matic` as a module:
+
+```
+from secretsantaomatic import Santa
+
+```
 
 ## Repository structure
 
