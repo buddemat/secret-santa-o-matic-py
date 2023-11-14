@@ -7,7 +7,7 @@ possibility to set invalid (i.e. forbidden) combinations.
 
 Author: Matthias Budde 2022 - 2023
 
-This file can also be imported as a module and contains the `Santa` class 
+This file can also be imported as a module and contains the `Santa` class
 with the following functions:
 
     * register_recipient
@@ -17,13 +17,13 @@ with the following functions:
 Additonally, when not imported as a module, this file executes some example
 code illustrating its use:
 
-    * main - the main function of the script
+    * main - the main function of the script, will terminate after 25 tries
+             if no valid sequence can be found.
 """
 
 #TODO This script requires that `logging` be installed within the Python
 #environment you are running this script in.
 
-#TODO Will terminate after 20 tries if no valid sequence can be found.
 
 __version__ = '0.03'
 
@@ -62,7 +62,7 @@ class Santa:
         return self.__sequence
 
     def register_recipient(self, name: str, forbidden_recipients: list = None):
-        """Adds a new recipient to Santa's candidate list, optionally with a list 
+        """Adds a new recipient to Santa's candidate list, optionally with a list
            of people whom they should not give gifts to.
         """
         if name.casefold() in (recipient.casefold() for recipient in self.__recipient_list):
@@ -70,7 +70,7 @@ class Santa:
         else:
             self.__recipient_list.append(name)
             if forbidden_recipients is not None:
-                self.__forbidden_recipients.update({name: forbidden_recipients}) 
+                self.__forbidden_recipients.update({name: forbidden_recipients})
         self.__sort_recipients_by_no_of_candidates()
         #TODO Update or invalidate __sequence
 
@@ -92,7 +92,7 @@ class Santa:
         """Creates a random secret santa sequence from Santa's candidate list.
         Begins with the candidate who has the fewest possible giftees and then
         continues to randomly draw from the remaining ones until a valid loop
-        is found or the retry count reaches the maximum. 
+        is found or the retry count reaches the maximum.
 
         Parameters
         ----------
@@ -134,34 +134,34 @@ class Santa:
                     fail_count += 1
                     result_sequence = []
         return result_sequence
-  
+
     def __get_possible_recipients(self, giftee_list:list, gifter_name:str) -> list:
         """Returns a dictionary of possible candidate recipients from the passed
         recipient list for the named gifter.
         """
         return list(set(giftee_list).difference(self.__forbidden_recipients.get(gifter_name, []), [gifter_name]))
- 
+
     def __sort_recipients_by_no_of_candidates(self):
         """Sorts recipient list by number of possible candidates ascending.
         """
         candidate_dict = { k: self.__get_possible_recipients(self.__recipient_list, k) for k in self.__recipient_list }
         self.__recipient_list = sorted(candidate_dict, key=lambda k: len(candidate_dict[k]), reverse=False)
         # return something?
- 
+
     def __sequence_possible(self) -> bool:
         #first, check number of recipients, less than two means not possible
         if len(self.__recipient_list) < 2:
             print(f'Not enough recipients registered with Santa ({len(self.__recipient_list)}).')
             return False
         #second, check number of possible recipients for candidate with least options, if zero then impossible
-        elif not self.__get_possible_recipients(self.__recipient_list, self.__recipient_list[0]):
-            print(f'There is at least one gifter with no valid giftees ("{self.__recipient_list[0]}").') 
+        if not self.__get_possible_recipients(self.__recipient_list, self.__recipient_list[0]):
+            print(f'There is at least one gifter with no valid giftees ("{self.__recipient_list[0]}").')
             return False
         #TODO implement further checks if it may be impossible to generate a sequence. Is this possible?
         #third, check for each ...?
         return True
 
-    def generate_sequence(self):
+    def generate_sequence(self) -> list:
         if not self.__sequence_possible():
             print('No sequence possible with current candidate list. Please reconfigure.')
         else:
@@ -188,11 +188,11 @@ def write_sequence(sequence: list, write_path:str='.'):
                     outfile.write(asciiart.read())
 
 def main():
+    """Main function to demo."""
     # Load options
-    options = yaml.safe_load(open('./config.yml'))
+    options = yaml.safe_load(open('./config.yml', encoding='utf-8'))
     outpath = options.get('outpath', '.')
 
-    """Main function to demo."""
     candidates = options.get('candidates')
 
     ssom = Santa(candidates)
