@@ -37,87 +37,127 @@ sso_logger.setLevel(sso_log_lvl) # log level for mylogger
 
 class Santa:
     def __init__(self, candidate_dict:dict = {}):
-        self.recipient_set = set(candidate_dict.keys())
-        self.forbidden_recipients = {k: set(v) for k, v in candidate_dict.items() if v is not None}
-        self.sequence = []
+        self.__recipient_list = list(candidate_dict.keys())
+        self.__forbidden_recipients = {k: set(v) for k, v in candidate_dict.items() if v is not None}
+        self.__sequence = []
+        self.__sort_recipients_by_no_of_candidates()
 
     def __str__(self) -> str:
         #TODO return meaningful string representation for printing
-        return f'Secret santa for {self.recipient_set}'
+        return f'Secret santa for {self.__recipient_list}'
+
+    def get_recipients(self) -> list:
+        """Returns list of currently registered recipients.
+        """
+        return self.__recipient_list
+
+    def get_forbidden_recipients(self) -> dict:
+        """Returns dict of forbidden recipients for all candidates.
+        """
+        return self.__forbidden_recipients
+
+    def get_sequence(self) -> list:
+        """Returns current sequence.
+        """
+        return self.__sequence
 
     def register_recipient(self, name: str, forbidden_recipients: list = None):
         """Adds a new recipient to Santa's candidate list, optionally with a list 
            of people whom they should not give gifts to.
         """
-        if name.casefold() in (recipient.casefold() for recipient in self.recipient_set):
+        if name.casefold() in (recipient.casefold() for recipient in self.__recipient_list):
             print(f'Someone by the name of {name} is already in the recipient list!')
         else:
-            self.recipient_set.add(name)
+            self.__recipient_list.append(name)
             if forbidden_recipients is not None:
-                self.forbidden_recipients.update({name: set(forbidden_recipients)}) 
+                self.__forbidden_recipients.update({name: forbidden_recipients}) 
+        self.__sort_recipients_by_no_of_candidates()
+        #TODO Update or invalidate __sequence
 
     def delete_recipient(self, name: str, cascade: bool = False):
         """Removes the named recipient from Santa's candidate list.
         """
-        self.recipient_set.discard(name)
+        if name in self.__recipient_list:
+            self.__recipient_list.remove(name)
+            self.__forbidden_recipients.pop(name, None)
         if cascade:
-            for k,v in list(self.forbidden_recipients.items()):
+            for k,v in list(self.__forbidden_recipients.items()):
                 v.discard(name)
                 if not v:
-                    self.forbidden_recipients.pop(k, None)
+                    self.__forbidden_recipients.pop(k, None)
+        self.__sort_recipients_by_no_of_candidates()
+        #TODO Update or invalidate __sequence
 
-    def __draw_lots(self, max_tries = 10) -> list:
+    def __draw_lots(self, max_tries = 25) -> list:
         """Creates a random secret santa sequence from Santa's candidate list.
+        Begins with the candidate who has the fewest possible giftees and then
+        continues to randomly draw from the remaining ones until a valid loop
+        is found or the retry count reaches the maximum. 
 
         Parameters
         ----------
-        candidate_dict : dict, mandatory
-            dict with names from whom a secret santa sequence should be drawn.
-            The candidate names are the keys and the (optional) values are a list
-            of candidates that should not receive gifts from the respective candidate.
+        max_tries: int, optional
+            maximum number of attemps to find a valid sequence before giving up.
 
         Returns
         ------
         Secret santa sequence as list of names. Last element is first name again.
         Returns empty set if no valid sequence can be found.
         """
-        candidate_set = self.recipient_set.copy()
         result_sequence = []
-        previous_candidate = None
         fail_count = 0
-        while candidate_set:
-            candidate_name = random.choice(tuple(candidate_set))
-            if not candidate_name in self.forbidden_recipients.get(previous_candidate, []):
-                result_sequence.append(candidate_name)
-                candidate_set.remove(candidate_name)
-                previous_candidate = candidate_name
-                fail_count = 0
-            else:
-                print('Candidate invalid!')
-                fail_count += 1
-            if fail_count >= max_tries:
-                result_sequence = []
-                break
-        # check if last and first in sequence are a valid combination
-        if result_sequence:
-            first_recipient = result_sequence[0]
-            if not first_recipient in self.forbidden_recipients.get(previous_candidate, []):
-                result_sequence.append(first_recipient)
-            else:
-                result_sequence = []
+        while not result_sequence and fail_count < max_tries:
+            print(f'Fail count is {fail_count}')
+            candidate_list = self.__recipient_list.copy()
+            first_recipient = candidate_list.pop(0)
+            result_sequence = [first_recipient]
+            previous_candidate = first_recipient
+            while candidate_list:
+                possible_giftees = self.__get_possible_recipients(candidate_list, previous_candidate)
+                if possible_giftees:
+                    candidate_name = random.choice(possible_giftees)
+                    result_sequence.append(candidate_name)
+                    candidate_list.remove(candidate_name)
+                    print(f'{previous_candidate} gives gift to {candidate_name}')
+                    previous_candidate = candidate_name
+                else:
+                    print('No candidate left for current recipient, starting over...')
+                    fail_count += 1
+                    result_sequence = []
+                    break
+            # check if last and first in sequence are a valid combination
+            if result_sequence:
+                if not first_recipient in self.__forbidden_recipients.get(previous_candidate, []):
+                    result_sequence.append(first_recipient)
+                else:
+                    print('Last and first recipients are not a valid pairing, starting over...')
+                    fail_count += 1
+                    result_sequence = []
         return result_sequence
-
-    def __is_valid_sequence(self, sequence: list):
-        #TODO
-        return False
+  
+    def __get_possible_recipients(self, giftee_list:list, gifter_name:str) -> list:
+        """Returns a dictionary of possible candidate recipients from the passed
+        recipient list for the named gifter.
+        """
+        return list(set(giftee_list).difference(self.__forbidden_recipients.get(gifter_name, []), [gifter_name]))
  
-    def __sequence_possble(self):
-        #TODO implement function to check if it may be impossible to generate a sequence
-        pass
+    def __sort_recipients_by_no_of_candidates(self):
+        """Sorts recipient list by number of possible candidates ascending.
+        """
+        candidate_dict = { k: self.__get_possible_recipients(self.__recipient_list, k) for k in self.__recipient_list }
+        self.__recipient_list = sorted(candidate_dict, key=lambda k: len(candidate_dict[k]), reverse=False)
+ 
+    def __sequence_possible(self) -> bool:
+        #TODO implement function to check if it may be impossible to generate a sequence. Is this possible?
+        #first, check number of recipients, less than two and not possible
+        #second, check number of possible recipients for candidate with least options, if zero then impossible
+        # (actually this encompasses option 1, so first check is probably unnecessary)
+        #third, check for each ...?
+        return True
 
     def generate_sequence(self):
-        self.sequence = self.__draw_lots()
-        return self.sequence
+        self.__sequence = self.__draw_lots()
+        return self.__sequence
 
 
 def write_sequence(sequence: list, write_path:str='.'):
