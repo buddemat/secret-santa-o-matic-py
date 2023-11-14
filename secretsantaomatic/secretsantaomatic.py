@@ -146,17 +146,28 @@ class Santa:
         """
         candidate_dict = { k: self.__get_possible_recipients(self.__recipient_list, k) for k in self.__recipient_list }
         self.__recipient_list = sorted(candidate_dict, key=lambda k: len(candidate_dict[k]), reverse=False)
+        # return something?
  
     def __sequence_possible(self) -> bool:
-        #TODO implement function to check if it may be impossible to generate a sequence. Is this possible?
-        #first, check number of recipients, less than two and not possible
+        #first, check number of recipients, less than two means not possible
+        if len(self.__recipient_list) < 2:
+            print(f'Not enough recipients registered with Santa ({len(self.__recipient_list)}).')
+            return False
         #second, check number of possible recipients for candidate with least options, if zero then impossible
-        # (actually this encompasses option 1, so first check is probably unnecessary)
+        elif not self.__get_possible_recipients(self.__recipient_list, self.__recipient_list[0]):
+            print(f'There is at least one gifter with no valid giftees ("{self.__recipient_list[0]}").') 
+            return False
+        #TODO implement further checks if it may be impossible to generate a sequence. Is this possible?
         #third, check for each ...?
         return True
 
     def generate_sequence(self):
-        self.__sequence = self.__draw_lots()
+        if not self.__sequence_possible():
+            print('No sequence possible with current candidate list. Please reconfigure.')
+        else:
+            self.__sequence = self.__draw_lots()
+            if not self.__sequence:
+                print('No valid sequence could be found, maybe it\'s not possible with the configured recipients?')
         return self.__sequence
 
 
@@ -186,9 +197,7 @@ def main():
 
     ssom = Santa(candidates)
 
-    sequence = []
-    while not sequence:
-        sequence = ssom.generate_sequence()
+    sequence = ssom.generate_sequence()
     #write_sequence(sequence, outpath)
     print(sequence)
 
