@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 """Secret-Santa-O-Matic (for Python)
 
-This script allows the user to generate and print to the console a sequence
+This module allows the user to generate and print to the console a sequence
 of names that represents a gift giving order for secret santa. Includes the
 possibility to set invalid (i.e. forbidden) combinations.
 
 Author: Matthias Budde 2022 - 2023
 
-This file can also be imported as a module and contains the `Santa` class
+This file can be imported as a module and contains the `Santa` class
 with the following functions:
 
     * register_recipient
@@ -46,7 +46,7 @@ class Santa:
         #TODO return meaningful string representation for printing
         return f'Secret santa for {self.__recipient_list}'
 
-    def get_recipients(self) -> list:
+    def get_recipients(self) -> list[str]:
         """Returns list of currently registered recipients.
         """
         return self.__recipient_list
@@ -56,26 +56,55 @@ class Santa:
         """
         return self.__forbidden_recipients
 
-    def get_sequence(self) -> list:
+    def get_sequence(self) -> list[str]:
         """Returns current sequence.
         """
         return self.__sequence
 
-    def register_recipient(self, name: str, forbidden_recipients: list = None):
+    def register_recipient(self, name: str, forbidden_recipients: list[str] = None) -> bool:
         """Adds a new recipient to Santa's candidate list, optionally with a list
            of people whom they should not give gifts to.
+
+        Parameters
+        ----------
+        name: str
+            name of the recipient that should be added to the list.
+        forbidden_recipients: list[str], optional
+           list of forbidden giftees, i.e. names for whom the added recipient 
+           should not be a gifter.
+
+        Returns
+        -------
+        `True` if the recipient was successfully added, `False` if someone by
+        the name of `name` already exists.
+
+        Examples
+        --------
+        >>> santa.register_recipient('Alice')
+        >>> santa.register_recipient('Bob', ['Alice'])
         """
         if name.casefold() in (recipient.casefold() for recipient in self.__recipient_list):
             print(f'Someone by the name of {name} is already in the recipient list!')
+            return False
         else:
             self.__recipient_list.append(name)
             if forbidden_recipients is not None:
                 self.__forbidden_recipients.update({name: forbidden_recipients})
         self.__sort_recipients_by_no_of_candidates()
         #TODO Update or invalidate __sequence
+        return True
 
     def delete_recipient(self, name: str, cascade: bool = False):
-        """Removes the named recipient from Santa's candidate list.
+        """Removes the named recipient from Santa's candidate list as well as
+        their list of forbidden recipients.
+
+        Parameters
+        ----------
+        name: str
+            name of the recipient that should be removed.
+        cascade: bool, optional
+            if `True`, the recipient will also be removed from all remaining
+            recipients' lists of forbidden giftees.
         """
         if name in self.__recipient_list:
             self.__recipient_list.remove(name)
@@ -88,7 +117,7 @@ class Santa:
         self.__sort_recipients_by_no_of_candidates()
         #TODO Update or invalidate __sequence
 
-    def __draw_lots(self, max_tries = 25) -> list:
+    def __draw_lots(self, max_tries = 25) -> list[str]:
         """Creates a random secret santa sequence from Santa's candidate list.
         Begins with the candidate who has the fewest possible giftees and then
         continues to randomly draw from the remaining ones until a valid loop
@@ -135,7 +164,7 @@ class Santa:
                     result_sequence = []
         return result_sequence
 
-    def __get_possible_recipients(self, giftee_list:list, gifter_name:str) -> list:
+    def __get_possible_recipients(self, giftee_list:list[str], gifter_name:str) -> list[str]:
         """Returns a dictionary of possible candidate recipients from the passed
         recipient list for the named gifter.
         """
@@ -161,7 +190,7 @@ class Santa:
         #third, check for each ...?
         return True
 
-    def generate_sequence(self) -> list:
+    def generate_sequence(self) -> list[str]:
         if not self.__sequence_possible():
             print('No sequence possible with current candidate list. Please reconfigure.')
         else:
@@ -171,7 +200,7 @@ class Santa:
         return self.__sequence
 
 
-def write_sequence(sequence: list, write_path:str='.'):
+def write_sequence(sequence: list[str], write_path:str='.'):
     """writes the passed sequence to files."""
     for gifter, recipient in zip(sequence, sequence[1:]):
         #print(gifter, recipient)
