@@ -48,20 +48,35 @@ class Santa:
 
     def get_recipients(self) -> list[str]:
         """Returns list of currently registered recipients.
+
+        Returns
+        -------
+        Returns currently registered recipients as list.
         """
         return self.__recipient_list
 
     def get_forbidden_recipients(self) -> dict:
         """Returns dict of forbidden recipients for all candidates.
+
+        Returns
+        -------
+        Returns dictionary of forbidden candiates for gifters. Keys are the names
+        of gifters that have at least one restriction, values are lists of the 
+        names of forbidden giftees for the respective gifter.
         """
         return self.__forbidden_recipients
 
     def get_sequence(self) -> list[str]:
         """Returns current sequence.
+
+        Returns
+        -------
+        Returns current sequence as list, empty list if no valid sequence has
+        been generated so far.
         """
         return self.__sequence
 
-    def register_recipient(self, name: str, forbidden_recipients: list[str] = None) -> bool:
+    def register_recipient(self, name:str, forbidden_recipients:list[str] = None) -> bool:
         """Adds a new recipient to Santa's candidate list, optionally with a list
            of people whom they should not give gifts to.
 
@@ -94,7 +109,7 @@ class Santa:
         #TODO Update or invalidate __sequence
         return True
 
-    def delete_recipient(self, name: str, cascade: bool = False):
+    def delete_recipient(self, name:str, cascade: bool = False):
         """Removes the named recipient from Santa's candidate list as well as
         their list of forbidden recipients.
 
@@ -117,7 +132,7 @@ class Santa:
         self.__sort_recipients_by_no_of_candidates()
         #TODO Update or invalidate __sequence
 
-    def __draw_lots(self, max_tries = 25) -> list[str]:
+    def __draw_lots(self, max_tries:int = 25) -> list[str]:
         """Creates a random secret santa sequence from Santa's candidate list.
         Begins with the candidate who has the fewest possible giftees and then
         continues to randomly draw from the remaining ones until a valid loop
@@ -129,7 +144,7 @@ class Santa:
             maximum number of attemps to find a valid sequence before giving up.
 
         Returns
-        ------
+        -------
         Secret santa sequence as list of names. Last element is first name again.
         Returns empty set if no valid sequence can be found.
         """
@@ -190,11 +205,25 @@ class Santa:
         #third, check for each ...?
         return True
 
-    def generate_sequence(self) -> list[str]:
+    def generate_sequence(self, max_tries:int = 25) -> list[str]:
+        """Generates a random secret santa sequence from Santa's candidate list.
+        First checks whether it may be obvious that no sequece is possible with
+        the current candidate list. Then attempts to generate sequence.
+
+        Parameters
+        ----------
+        max_tries: int, optional
+            maximum number of attemps to find a valid sequence before giving up.
+
+        Returns
+        ------
+        Secret santa sequence as list of names. Last element is first name again.
+        Returns empty set if no valid sequence can be found.
+        """
         if not self.__sequence_possible():
             print('No sequence possible with current candidate list. Please reconfigure.')
         else:
-            self.__sequence = self.__draw_lots()
+            self.__sequence = self.__draw_lots(max_tries)
             if not self.__sequence:
                 print('No valid sequence could be found, maybe it\'s not possible with the configured recipients?')
         return self.__sequence
