@@ -286,6 +286,36 @@ class Santa:
                 return False
             return True
 
+# import smtplib, ssl
+# import getpass
+# def send_emails():
+#     mode = 'SSL'
+#     port = 2525 #587  # For STARTTLS
+#     smtp_server = 'mail.teco.edu'
+#     login = "budde@teco.edu"  # Enter your address
+#     sender_email = "budde@teco.edu"  # Enter your address
+#     #sender_email = "secret-santa-o-matic@teco.edu"  # Enter your address
+#     receiver_email = "budde@teco.edu"  # Enter receiver address
+#     password = getpass.getpass("Type your password and press enter: ")
+#     message = """\
+#     Subject: Hi there
+#     
+#     This message is sent from Python."""
+#     
+#     context = ssl.create_default_context()
+#     if mode == 'STARTTLS':
+#         with smtplib.SMTP(smtp_server, port) as server:
+#             server.set_debuglevel(1)
+#             server.ehlo()  # Can be omitted
+#             server.starttls(context=context)
+#             server.ehlo()  # Can be omitted
+#             server.login(login, password)
+#             server.sendmail(sender_email, receiver_email, message)
+#     elif mode == 'SSL':
+#         with smtplib.SMTP_SSL(smtp_server, port, context=context) as server:
+#             server.set_debuglevel(1)
+#             server.login(sender_email, password)
+#             server.sendmail(sender_email, receiver_email, message)
 
 def main():
     """Main function to demo."""
@@ -300,7 +330,7 @@ def main():
     ssom.writepath = './santas'
 
     sequence = ssom.generate_sequence()
-    ssom.write_sequence()
+    ssom.write_sequence_to_files()
     print(sequence)
 
 if __name__ == '__main__':
