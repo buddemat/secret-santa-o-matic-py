@@ -4,3 +4,5 @@
 secretsantaomatic/santas/*
 secretsantaomatic/__pycache__
 !secretsantaomatic/santas/README.md
+secretsantaomatic/config.yml
+
