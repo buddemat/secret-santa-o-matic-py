@@ -36,13 +36,14 @@ sso_log_lvl = logging.getLevelName('INFO')
 sso_logger.setLevel(sso_log_lvl) # log level for mylogger
 
 class Santa:
-    def __init__(self, candidate_dict:dict = {}):
+    def __init__(self, candidate_dict:dict = {}, verbosity:int = 1):
         self.__recipient_list = list(candidate_dict.keys())
         self.__forbidden_recipients = {k: set(v) for k, v in candidate_dict.items() if v is not None}
         self.__sequence = []
         self.__sort_recipients_by_no_of_candidates()
         self.asciiartpath = None
         self.writepath = None
+        self.verbosity = verbosity
 
     def __str__(self) -> str:
         #TODO return meaningful string representation for printing
@@ -164,7 +165,8 @@ class Santa:
                     candidate_name = random.choice(possible_giftees)
                     result_sequence.append(candidate_name)
                     candidate_list.remove(candidate_name)
-                    print(f'{previous_candidate} gives gift to {candidate_name}')
+                    if self.verbosity:
+                        print(f'{previous_candidate} gives gift to {candidate_name}')
                     previous_candidate = candidate_name
                 else:
                     print('No candidate left for current recipient, starting over...')
@@ -175,7 +177,8 @@ class Santa:
             if result_sequence:
                 if not first_recipient in self.__forbidden_recipients.get(previous_candidate, []):
                     result_sequence.append(first_recipient)
-                    print(f'{previous_candidate} gives gift to {first_recipient}')
+                    if self.verbosity:
+                        print(f'{previous_candidate} gives gift to {first_recipient}')
                 else:
                     print('Last and first recipients are not a valid pairing, starting over...')
                     fail_count += 1
@@ -286,52 +289,24 @@ class Santa:
                 return False
             return True
 
-# import smtplib, ssl
-# import getpass
-# def send_emails():
-#     mode = 'SSL'
-#     port = 2525 #587  # For STARTTLS
-#     smtp_server = 'mail.teco.edu'
-#     login = "budde@teco.edu"  # Enter your address
-#     sender_email = "budde@teco.edu"  # Enter your address
-#     #sender_email = "secret-santa-o-matic@teco.edu"  # Enter your address
-#     receiver_email = "budde@teco.edu"  # Enter receiver address
-#     password = getpass.getpass("Type your password and press enter: ")
-#     message = """\
-#     Subject: Hi there
-#     
-#     This message is sent from Python."""
-#     
-#     context = ssl.create_default_context()
-#     if mode == 'STARTTLS':
-#         with smtplib.SMTP(smtp_server, port) as server:
-#             server.set_debuglevel(1)
-#             server.ehlo()  # Can be omitted
-#             server.starttls(context=context)
-#             server.ehlo()  # Can be omitted
-#             server.login(login, password)
-#             server.sendmail(sender_email, receiver_email, message)
-#     elif mode == 'SSL':
-#         with smtplib.SMTP_SSL(smtp_server, port, context=context) as server:
-#             server.set_debuglevel(1)
-#             server.login(sender_email, password)
-#             server.sendmail(sender_email, receiver_email, message)
 
 def main():
     """Main function to demo."""
     # Load options
     options = yaml.safe_load(open('./config.yml', encoding='utf-8'))
     outpath = options.get('outpath', './santas')
+    verbosity = options.get('verbosity', 1)
 
     candidates = options.get('candidates')
 
-    ssom = Santa(candidates)
+    ssom = Santa(candidates, verbosity)
     ssom.asciiartpath = 'ascii_tree.txt' 
     ssom.writepath = './santas'
 
     sequence = ssom.generate_sequence()
     ssom.write_sequence_to_files()
-    print(sequence)
+    if verbosity:
+        print(sequence)
 
 if __name__ == '__main__':
     main()

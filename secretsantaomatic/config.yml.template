@@ -1,5 +1,6 @@
 outpath: './santas'
 asciiartpath: 'ascii_tree.txt'
+verbosity: 0
 
 candidates:
     # Candidate name: [List of people that are not supposed to recieve a gift from candidate]
