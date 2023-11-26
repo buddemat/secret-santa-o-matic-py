@@ -286,6 +286,7 @@ class Santa:
                                 outfile.write(asciiart.read())
             except (PermissionError, FileExistsError) as err:
                 print(err)
+                print('Error: Could not write sequence! Possibly existing files do NOT contain generated sequence!')
                 return False
             return True
 
