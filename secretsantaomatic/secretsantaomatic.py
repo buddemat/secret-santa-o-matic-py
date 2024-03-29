@@ -69,14 +69,14 @@ class Santa:
         """
         return self.__forbidden_recipients
 
-    def get_forbidden_recipients_for(self, candidate) -> list:
-        """Returns list of forbidden recipients for specified candidate.
+    def get_forbidden_recipients_for(self, candidate) -> set:
+        """Returns set of forbidden recipients for specified candidate.
 
         Returns
         -------
-        Returns list of forbidden candiates for specified gifter. 
+        Returns set of forbidden candiates for specified gifter. 
         """
-        return self.__forbidden_recipients.get(candidate, [])
+        return self.__forbidden_recipients.get(candidate, set())
 
     def add_forbidden_recipient_for(self, candidate, new_forbidden_recipient) -> bool:
         """Adds a name to list of forbidden recipients for specified candidate.
@@ -86,10 +86,9 @@ class Santa:
         Returns True on success, False else, e.g. if candidate name does not exists
         """
         if candidate in self.__recipient_list:
-            forbidden_list = self.__forbidden_recipients.get(candidate, [])
-            if new_forbidden_recipient not in forbidden_list:
-                forbidden_list.append(new_forbidden_recipient)
-                self.__forbidden_recipients[candidate] = forbidden_list
+            forbidden_set = self.__forbidden_recipients.get(candidate, set())
+            forbidden_set.add(new_forbidden_recipient)
+            self.__forbidden_recipients[candidate] = forbidden_set
             return True 
         else:
             return False
@@ -103,8 +102,8 @@ class Santa:
         or recipient to remove is not in list
         """
         if candidate in self.__recipient_list:
-            forbidden_list = self.__forbidden_recipients.get(candidate, [])
-            if forbidden_recipient_to_remove not in forbidden_list:
+            forbidden_set = self.__forbidden_recipients.get(candidate, set())
+            if forbidden_recipient_to_remove not in forbidden_set:
                 return False
             else:
                 self.__forbidden_recipients[candidate].remove(forbidden_recipient_to_remove)
@@ -219,7 +218,7 @@ class Santa:
                     break
             # check if last and first in sequence are a valid combination
             if result_sequence:
-                if not first_recipient in self.__forbidden_recipients.get(previous_candidate, []):
+                if not first_recipient in self.__forbidden_recipients.get(previous_candidate, set()):
                     result_sequence.append(first_recipient)
                     if self.verbosity:
                         print(f'{previous_candidate} gives gift to {first_recipient}')
@@ -233,7 +232,7 @@ class Santa:
         """Returns a dictionary of possible candidate recipients from the passed
         recipient list for the named gifter.
         """
-        return list(set(giftee_list).difference(self.__forbidden_recipients.get(gifter_name, []), [gifter_name]))
+        return list(set(giftee_list).difference(self.__forbidden_recipients.get(gifter_name, set()), [gifter_name]))
 
     def __sort_recipients_by_no_of_candidates(self):
         """Sorts recipient list by number of possible candidates ascending.
