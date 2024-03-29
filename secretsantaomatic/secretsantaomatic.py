@@ -69,6 +69,50 @@ class Santa:
         """
         return self.__forbidden_recipients
 
+    def get_forbidden_recipients_for(self, candidate) -> list:
+        """Returns list of forbidden recipients for specified candidate.
+
+        Returns
+        -------
+        Returns list of forbidden candiates for specified gifter. 
+        """
+        return self.__forbidden_recipients.get(candidate, [])
+
+    def add_forbidden_recipient_for(self, candidate, new_forbidden_recipient) -> bool:
+        """Adds a name to list of forbidden recipients for specified candidate.
+
+        Returns
+        -------
+        Returns True on success, False else, e.g. if candidate name does not exists
+        """
+        if candidate in self.__recipient_list:
+            forbidden_list = self.__forbidden_recipients.get(candidate, [])
+            if new_forbidden_recipient not in forbidden_list:
+                forbidden_list.append(new_forbidden_recipient)
+                self.__forbidden_recipients[candidate] = forbidden_list
+            return True 
+        else:
+            return False
+
+    def remove_forbidden_recipient_for(self, candidate, forbidden_recipient_to_remove) -> bool:
+        """Removes a name from list of forbidden recipients for specified candidate.
+
+        Returns
+        -------
+        Returns True on success, False else, e.g. if candidate name does not exists 
+        or recipient to remove is not in list
+        """
+        if candidate in self.__recipient_list:
+            forbidden_list = self.__forbidden_recipients.get(candidate, [])
+            if forbidden_recipient_to_remove not in forbidden_list:
+                return False
+            else:
+                self.__forbidden_recipients[candidate].remove(forbidden_recipient_to_remove)
+            return True 
+        else:
+            return False
+
+
     def get_sequence(self) -> list[str]:
         """Returns current sequence.
 
