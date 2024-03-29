@@ -1,5 +1,6 @@
 *.swp
 *.swo
+*.bak
 
 secretsantaomatic/santas/*
 secretsantaomatic/__pycache__
